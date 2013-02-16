@@ -92,7 +92,7 @@ var Tagger = (function(){
   };
 
   // turn the tags array into actual tags
-  // THIS SHOULDNT LIVE IN THE MODEL SPACE! THIS IS A CONTROLLER ACTION!
+  // THIS SHOULDNT LIVE IN THE MODEL SPACE! THIS IS A CONTROLLER ACTION!!
   Tag.renderTags = function(){
     Tagger.tags.forEach(function(tag){
       Tag.renderTag(tag);
