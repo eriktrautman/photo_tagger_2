@@ -1,11 +1,11 @@
 var Tagger = (function(){
 
-  // Constants
+  // Constants and Globals
   var box = {
     size: 100,
     border: 10
   };
-  var image_name = null;
+  var image_id = null;
   var targeter = null;
   var targeter_x = null;
   var targeter_y = null;
@@ -21,26 +21,34 @@ var Tagger = (function(){
                 "Odlaw",
                 "Watcher" ];
 
-  function Tag(x, y, name, image_name){
+  function Tag(x, y, name, image_id){
     this.x = x;
     this.y = y;
     this.name = name;
-    this.image_name = image_name;
+    this.image_id = image_id;
 
     this.save = function(callback){
-      console.log("SAVED!!!")
-
-      if(callback) {
-        callback();
-      }
-    }
+      $.post("/tags.json", {
+        tag: {
+          x: this.x,
+          y: this.y,
+          name: this.name,
+          image_id: this.image_id
+        }
+      }, function(response){
+        console.log("Got back a response! It's: "+response);
+        if(callback) {
+          callback();
+        }
+      });
+    };
   }
 
   // The initial setup function
   function Initializer(container){
     Tagger.container = container;
     var image = container.find("img");
-    Tagger.image_name = image.attr('name');
+    Tagger.image_id = image.attr('name');
     var that = this;
     console.log(Tagger.tags);
 
@@ -84,7 +92,7 @@ var Tagger = (function(){
     var tag_x = Tagger.targeter_x;
     var tag_y = Tagger.targeter_y;
     var name = $(event.target).attr("name");
-    var image_name = Tagger.image_name;
+    var image_id = Tagger.image_id;
 
     // create the tag locally
     Tagger.container
@@ -98,12 +106,16 @@ var Tagger = (function(){
         "</div>");
 
     // store the tag locally
-    var tag = new Tag(tag_x, tag_y, name, image_name);
+    var tag = new Tag(tag_x, tag_y, name, image_id);
     console.log(tag);
     Tagger.tags.push(tag);
 
     // push the tag into the database
+    tag.save(console.log("SAVED!"));
 
+  }
+
+  function buildTag(){
 
   }
 
@@ -157,7 +169,7 @@ var Tagger = (function(){
     Tag: Tag,
     tags: tags,
     names: names,
-    image_name: image_name,
+    image_id: image_id,
     targeter: targeter,
     container: container,
 
