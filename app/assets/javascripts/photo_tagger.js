@@ -21,6 +21,8 @@ var Tagger = (function(){
                 "Odlaw",
                 "Watcher" ];
 
+
+  // MODEL *******************************
   function Tag(x, y, name, image_id, id){
     this.x = x;
     this.y = y;
@@ -39,13 +41,31 @@ var Tagger = (function(){
         }
       }, function(response){
         that.id = response.id;
-        console.log("Got back a response! It's: "+response);
-        console.log(that);
         if(callback) {
-          callback();
+          callback(that);
         }
       });
     };
+
+    this.destroy = function(){
+      that = this;
+      console.log("DESTROYING TAG NOW");
+      $.ajax({
+        url: '/tags/'+this.id+'.json',
+        type: 'DELETE',
+        success: function(result){
+          $('div[name='+that.id+']').remove();
+
+          // delete the tag from the local array
+          index = Tagger.tags.indexOf(that);
+          Tagger.tags.splice(index, 1);
+        }
+      });
+    }
+
+    this.freakout = function(){
+      console.log("FREAKING OUT");
+    }
   }
 
   // pull in the tags from the database
@@ -73,42 +93,48 @@ var Tagger = (function(){
 
   // turn the tags array into actual tags
   // THIS SHOULDNT LIVE IN THE MODEL SPACE! THIS IS A CONTROLLER ACTION!
-  Tag.buildTags = function(){
-    console.log("sgusga");
-    wrapper = Tagger.container.find(".tags");
-    console.log(wrapper);
-    console.log(Tagger.tags);
+  Tag.renderTags = function(){
     Tagger.tags.forEach(function(tag){
-      console.log("stuff");
-      wrapper.append("<div class='box tag show' name='" +
-        tag.id +
-        "' style='left:" +
-        tag.x + "px; top:" +
-        tag.y +
-        "px'>" +
-        tag.name +
-        "</div>"
-      )
+      Tag.renderTag(tag);
     });
   };
 
-  // The initial setup function
-  function Initializer(container){
+  Tag.renderTag = function(tag){
+    wrapper = Tagger.container.find(".tags");
+    wrapper.append("<div class='box tag show' name='" +
+      tag.id +
+      "' style='left:" +
+      tag.x + "px; top:" +
+      tag.y +
+      "px'>" +
+      tag.name +
+      " <img class='tag_close' id='delete_tag_" +
+      tag.id +
+      "' src='/assets/close.png'/>" +
+      "</div>"
+    );
+
+    close_button = $('#delete_tag_'+tag.id);
+    console.log(close_button);
+    close_button.click(tag.destroy.bind(tag));
+  }
+
+  // Controller **********************************
+  function Initializer(container){  // CALL ME TagsController!!!!
     Tagger.container = container;
     var image = container.find("img");
     Tagger.image_id = image.attr('name');
     var that = this;
-    console.log(Tagger.tags);
 
     this.render = function(){
       // tag elements
       Tagger.buildTagTargeter(container);
-      Tagger.Tag.getTags(Tagger.Tag.buildTags);
+      Tagger.Tag.getTags(Tagger.Tag.renderTags);
 
       // listeners
       image.click(Tagger.targetTag);
-      image.mouseenter(Tagger.showTags);
-      image.mouseleave(Tagger.hideTags);
+      container.mouseenter(Tagger.showTags);
+      container.mouseleave(Tagger.hideTags);
     };
   };
 
@@ -122,10 +148,8 @@ var Tagger = (function(){
       Tagger.targeter_y = y;
     };
 
-    // Render the "new page", which is a new tag plus menu
+    // Render the tag targeter plus menu
     var render = function(){
-      console.log(x);
-      console.log(y);
       Tagger.targeter
         .css("left", x)
         .css("top", y)
@@ -146,38 +170,26 @@ var Tagger = (function(){
     var name = $(event.target).attr("name");
     var image_id = Tagger.image_id;
 
-    // create the tag locally
-    Tagger.container.find(".tags")
-      .append("<div class='box tag show' name='" +
-        name +
-        "' style='left:" +
-        tag_x + "px; top:" +
-        tag_y +
-        "px'>" +
-        name +
-        "</div>");
-
     // store the tag locally
     var tag = new Tag(tag_x, tag_y, name, image_id);
-    console.log(tag);
     Tagger.tags.push(tag);
 
-    // push the tag into the database
-    tag.save(console.log("SAVED!"));
+    // push the tag into the database then render it
+    tag.save(function(){
+      Tag.renderTag(tag);
+    });
 
+    // hide the targeter
+    Tagger.targeter.removeClass("show").addClass("hide");
   }
 
-
-
   function showTags(){
-    console.log("SHOWING");
     Tagger.container.find(".tag")
       .removeClass("hide")
       .addClass("show");
   }
 
   function hideTags(){
-    console.log("HIDING");
     Tagger.container.find(".tag")
       .removeClass("show")
       .addClass("hide");
@@ -209,9 +221,6 @@ var Tagger = (function(){
     Tagger.targeter.find(".name_selector").click(createTag);
   }
 
-  // Construct the container
-
-
   // Returns all our top level functions and variables
   return {
     // variables
@@ -229,7 +238,7 @@ var Tagger = (function(){
     targetTag: targetTag,
     createTage: createTag,
     showTags: showTags,
-    hideTags: hideTags,
+    hideTags: hideTags
   };
 
 })();
@@ -242,3 +251,9 @@ $(function() {
   var initializer = new Tagger.Initializer(container);
   initializer.render();
 });
+
+
+// TO FIX:
+// Break up model and controllers
+// clean up the returns on the controller... apparently class methods need not apply
+// Sort out the namespaces

@@ -33,4 +33,18 @@ class TagsController < ApplicationController
 
   end
 
+  def destroy
+    puts "\n\n\n\n\n\n\n\n\n\n\n DESTROYING ********************** \n\n\n\n\n"
+    tag = Tag.find(params[:id])
+    if tag.delete
+      puts "TAG DESTROYED"
+      flash[:success] = "Tag was destroyed"
+      respond_to do |format|
+        format.json { render json: {status: "SUCCESS!"} }
+      end
+    else
+      flash.now[:error] = "Tag was not destroyed"
+    end
+  end
+
 end

@@ -12,66 +12,89 @@
  *= require_tree .
  */
 
-    .box {
-      border-color: black;
-      height: 100px;
-      width: 100px;
-      margin-left: -50px;
-      margin-top: -50px;
-      border: 8px solid black;
-      font-size: 200%;
-    }
+#container {
+  background-color: black;
+  text-align: center;
+  width: 1024px;
+}
 
-    .tag {
-      position: absolute;
-    }
+.image {
+  max-width: 100%;
+}
 
-    .show{
-      visibility: visible;
-    }
+.box {
+  border-color: black;
+  height: 100px;
+  width: 100px;
+  margin-left: -50px;
+  margin-top: -50px;
+  border: 8px solid black;
+  font-size: 200%;
+}
 
-    .hide{
-      visibility: hidden;
-    }
+.tag {
+  position: absolute;
+}
 
-    .close {
-      position: absolute;
-      top: 0;
-      left: 0;
-      margin-left: 50px;
-      margin-top: -65px;
-    }
+.tag_close{
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-left: 85px;
+  margin-top: -20px;
+}
 
-    .close:hover {
-      left: 3;
-      top: 3;
-      border-radius: 40px;
-    }
+.tag_close:hover{
+  top: 3;
+  left: 3;
+}
 
-    #tag_targeter {
-      position: absolute;
-    }
+.show{
+  visibility: visible;
+}
 
-    .tagged {
-      font-size: 200%;
-      text-shadow: 0.1em 0.1em white;
-      color: red;
-      text-align: center;
-    }
+.hide{
+  visibility: hidden;
+}
 
-    #target_names{
-      list-style-type: none;
-      padding: 0;
-    }
+.close {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-left: 42px;
+  margin-top: -62px;
+}
 
-    #target_names li {
-      border: 5px solid black;
-      background-color: white;
-      text-align: center;
-    }
+.close:hover {
+  left: 3;
+  top: 3;
+  border-radius: 40px;
+}
 
-    #target_names li:hover {
-      border: 5px solid black;
-      background-color: black;
-      color: white;
-    }
+#tag_targeter {
+  position: absolute;
+}
+
+.tagged {
+  font-size: 200%;
+  text-shadow: 0.1em 0.1em white;
+  color: red;
+  text-align: center;
+}
+
+#target_names{
+  list-style-type: none;
+  padding: 0;
+}
+
+#target_names li {
+  border: 5px solid black;
+  background-color: white;
+  text-align: center;
+}
+
+#target_names li:hover {
+  border: 5px solid black;
+  background-color: black;
+  color: white;
+}
