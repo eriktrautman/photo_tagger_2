@@ -21,11 +21,13 @@ var Tagger = (function(){
                 "Odlaw",
                 "Watcher" ];
 
-  function Tag(x, y, name, image_id){
+  function Tag(x, y, name, image_id, id){
     this.x = x;
     this.y = y;
     this.name = name;
     this.image_id = image_id;
+    this.id = id;
+    that = this;
 
     this.save = function(callback){
       $.post("/tags.json", {
@@ -36,13 +38,59 @@ var Tagger = (function(){
           image_id: this.image_id
         }
       }, function(response){
+        that.id = response.id;
         console.log("Got back a response! It's: "+response);
+        console.log(that);
         if(callback) {
           callback();
         }
       });
     };
   }
+
+  // pull in the tags from the database
+  Tag.getTags = function(callback){
+    $.getJSON(
+      "/tags.json?image_id="+Tagger.image_id,
+      function(data){
+        data.forEach(function(datum){
+          Tagger.tags.push(
+            new Tag(
+              datum.x,
+              datum.y,
+              datum.name,
+              datum.image_id,
+              datum.id
+            )
+          )
+        })
+        if(callback){
+          callback();
+        }
+      }
+    );
+  };
+
+  // turn the tags array into actual tags
+  // THIS SHOULDNT LIVE IN THE MODEL SPACE! THIS IS A CONTROLLER ACTION!
+  Tag.buildTags = function(){
+    console.log("sgusga");
+    wrapper = Tagger.container.find(".tags");
+    console.log(wrapper);
+    console.log(Tagger.tags);
+    Tagger.tags.forEach(function(tag){
+      console.log("stuff");
+      wrapper.append("<div class='box tag show' name='" +
+        tag.id +
+        "' style='left:" +
+        tag.x + "px; top:" +
+        tag.y +
+        "px'>" +
+        tag.name +
+        "</div>"
+      )
+    });
+  };
 
   // The initial setup function
   function Initializer(container){
@@ -53,12 +101,16 @@ var Tagger = (function(){
     console.log(Tagger.tags);
 
     this.render = function(){
+      // tag elements
       Tagger.buildTagTargeter(container);
+      Tagger.Tag.getTags(Tagger.Tag.buildTags);
+
+      // listeners
       image.click(Tagger.targetTag);
-      console.log(Tagger.hideTags);
-      image.hover(Tagger.showTags, Tagger.hideTags);
+      image.mouseenter(Tagger.showTags);
+      image.mouseleave(Tagger.hideTags);
     };
-  }
+  };
 
   function targetTag(event){
 
@@ -95,13 +147,13 @@ var Tagger = (function(){
     var image_id = Tagger.image_id;
 
     // create the tag locally
-    Tagger.container
+    Tagger.container.find(".tags")
       .append("<div class='box tag show' name='" +
         name +
         "' style='left:" +
-        tag_x + "; top:" +
+        tag_x + "px; top:" +
         tag_y +
-        "'>" +
+        "px'>" +
         name +
         "</div>");
 
@@ -115,9 +167,7 @@ var Tagger = (function(){
 
   }
 
-  function buildTag(){
 
-  }
 
   function showTags(){
     console.log("SHOWING");
